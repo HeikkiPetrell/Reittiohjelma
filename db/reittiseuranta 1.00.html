@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html>
+<head>
+     <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height"/>
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<!--
+	<meta http-equiv="Content-Security-Policy" content="
+			default-src 'self' 'unsafe-inline'  http://api.openweathermap.org https://mts.googleapis.com https://maps.googleapis.com https://maps.gstatic.com ws://192.168.0.106:3000 http://code.jquery.com https://code.jquery.com https://csi.gstatic.com  https://ssl.gstatic.com gap: data: blob: filesystem: ; 
+	" />
+	-->
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+	<script src="https://code.jquery.com/jquery-2.1.4.js" integrity="sha256-siFczlgw4jULnUICcdm9gjQPZkw/YPDqhQ9+nAOScE4="	crossorigin="anonymous"></script>
+	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+   <!-- <link rel="stylesheet" type="text/css" href="css/index.css"> -->
+    <style>
+body,
+.ui-page {
+    min-height:100% !important;
+    height:auto !important;
+}
+
+.ui-content {
+    margin-bottom:42px; /* HEIGHT OF YOUR FOOTER */
+}
+
+.ui-footer {
+    position:absolute !important;
+    width:100%;
+    bottom:0;
+}
+.li a{
+	font-size:12px;
+}
+#ReittiLista {
+	font-size:10px;
+	word-wrap:break-word;
+
+}
+	</style>
+	<title>Reittiohjelma</title>
+
+</head>
+    <body>
+	
+	<div data-role="popup" id="popupMenu" data-transition="pop" data-theme="a"  style="margin:auto">
+		<ul data-role="listview">
+			<li><a href="#etusivu">Etusivu</a></li>			
+			<li><a href="#kartta">Karttanäkymä</a></li>
+			<li><a href="#reitit">Aiemmat reitit</a></li>
+		</ul>
+	</div>
+	
+	    <div data-role="page" id="etusivu">
+			<div data-role="header" style="text-align:center">
+				<a href="#popupMenu" data-rel="popup" data-transition="flip" class="ui-btn ui-btn-inline  ui-corner-all ui-icon-bars ui-btn-icon-notext">Menu</a>
+				<b>Reittikartoitin</b>
+			</div> 
+			<div role="main" class="ui-content ui-body-a" id="perusbody" style="text-align:center;">
+				<div class="aika">
+					<h1>
+					</h1>
+				</div>
+				<div class="ui-content ui-body-a" id="tiedot" style="font-size:16px; text-align:center; padding-top:5px;" hidden>
+					<div class="ui-grid-a">
+						<div class="ui-block-a"><b>Viimeisin nopeus</b></div>
+						<div class="ui-block-b"><b>huippunopeus</b></div>						
+					</div>
+					<div class="ui-grid-a">					
+						<div class="ui-block-a" id="nykynopeus"></div>
+						<div class="ui-block-b" id="huippunopeus"></div>
+
+					</div>
+					<div class="ui-grid-a">
+						<div class="ui-block-a"><b>Keskinopeus</b></div>
+						<div class="ui-block-b"><b>Kuljettu matka</b></div>	
+					</div>
+					<div class="ui-grid-a">
+						<div class="ui-block-a" id="keskinopeus"></div>
+						<div class="ui-block-b" id="kuljettumatka"></div>
+					</div>
+				</div>
+				<div class="ui-grid-a" style="position:fixed; bottom:13%; left:23%;">
+					<div class="ui-block-a"><button class="ui-btn ui-icon-recycle ui-btn-icon-left ui-btn-inline ui-corner-all" id="nollaa" style="display:none;">Nollaa</button></div>
+					<div class="ui-block-b"><button class="ui-btn ui-icon-cloud ui-btn-icon-left ui-btn-inline ui-corner-all" id="talleta" style="display:none;">tallenna</button></div>
+				</div>
+			</div>
+			<div hidden role="main" class="ui-content ui-body-a" style="text-align:center;" id="tiedotbody">
+				<b>Tallenna reitti</b>
+				<label for="kuvaus" style="text-align:left;">Syötä Lisätietoja:</label>
+				<input type="text" id="kuvaus" data-mini="true">
+				<div class="tietoja" style="text-align:center; font-size:12px; padding-top:5px;">
+					<div class="ui-grid-c">
+						<div class="ui-block-a"><b>Max</b></div>
+						<div class="ui-block-b"><b>AVG</b></div>
+						<div class="ui-block-c"><b>Km</b></div>
+						<div class="ui-block-d"><b>Kesto</b></div>
+					</div>
+					<div class="ui-grid-c">
+						<div class="ui-block-a" id="huippu"></div>
+						<div class="ui-block-b" id="keski"></div>
+						<div class="ui-block-c" id="kokMatka"></div>
+						<div class="ui-block-d" id="kulutettuaika"></div>
+					</div>
+					<div class="ui-grid-b" style="padding-top:8px">
+						<div class="ui-block-a"><b>Alku</b></div>
+						<div class="ui-block-b"><b>Loppu</b></div>
+						<div class="ui-block-c"><b>Mittaukset</b></div>
+					</div>
+					<div class="ui-grid-b">
+						<div class="ui-block-a" id="alkupiste"></div>
+						<div class="ui-block-b" id="loppupiste"></div>
+						<div class="ui-block-c" id="mittaukset"></div>
+					</div>
+				</div>
+			
+				<div id="kartta2" style="height:300px;">
+				</div>
+
+			</div>
+			<div data-role="footer" data-type="horizontal" style="text-align:center;" id="perusfooter">
+				<p>
+					<button class="ui-btn ui-icon-clock ui-btn-icon-left ui-btn-inline ui-corner-all" id="aloita">Aloita</button>
+					<button class="ui-btn ui-icon-check ui-btn-icon-left ui-btn-inline ui-corner-all" id="lopeta" disabled>lopeta</button>
+				</p>
+			</div>
+			<div data-role="footer" data-type="horizontal" style="text-align:center;" id="tiedotfooter" hidden>
+				<p>
+					<button class="ui-btn ui-icon-check ui-btn-icon-left ui-btn-inline ui-corner-all" id="vieKantaan">Tallenna</button>
+					<button class="ui-btn ui-icon-delete ui-btn-icon-left ui-btn-inline ui-corner-all" id="peruuta">peruuta</button>
+				</p>
+			</div>
+		</div>
+		
+		<div data-role="page" id="kartta">
+			<a href="#popupMenu" data-rel="popup" data-transition="flip" class="ui-btn ui-btn-inline  ui-corner-all ui-icon-bars ui-btn-icon-notext">Menu</a>
+			<div role="main" class="ui-content ui-body-a">
+				<div id="mapKartta" style="height:500px;"></div> 	
+			</div>
+		</div>
+		
+		<div data-role="page" id="reitit">
+			<a href="#popupMenu" data-rel="popup" data-transition="flip" class="ui-btn ui-btn-inline  ui-corner-all ui-icon-bars ui-btn-icon-notext">Menu</a>
+			<div role="main" class="ui-content ui-body-a">
+				<div class="ui-grid-d" id="ReittiLista">
+					<div class="ui-block-a" style="width:10%">
+						<ul data-role="listview" id="reittiListaValitse" data-inset="true">
+							<li data-role="list-divider" role="heading" data-icon="false"><a>&nbsp;</a></li>					
+						</ul>
+					</div>
+					<div class="ui-block-b" style="width:25%">
+						<ul data-role="listview" id="reittiListaAlku" data-inset="true">
+							<li id="sortalku" data-role="list-divider" role="heading" data-icon="false"><a>Alku</a></li>						
+						</ul>
+					</div>
+					<div class="ui-block-c" style="width:25%">
+						<ul data-role="listview" id="reittiListaLoppu" data-inset="true">
+							<li id="sortloppu" data-role="list-divider" role="heading" data-icon="false"><a>Loppu</a></li>						
+						</ul>
+					</div>
+					<div class="ui-block-d" style="width:30%">
+						<ul data-role="listview" id="reittiListaPvm" data-inset="true">
+							<li id="sortpvm" data-role="list-divider" role="heading" data-icon="false"><a>Aika</a></li>						
+						</ul>
+					</div>
+					<div class="ui-block-e" style="width:10%">
+						<ul data-role="listview" id="reittiListaPoista" data-inset="true">
+							<li data-role="list-divider" role="heading" data-icon="false"><a>&nbsp;</a></li>					
+						</ul>
+					</div>						
+				</div>
+			</div>
+			<div data-role="popup" id="popup_vahvistus">
+				<div data-role="content">
+					<h3 id="poistoTxt"></h3>				
+					<a class="ui-btn ui-corner-all" data-rel="back">Peruuta</a>
+					<a class="ui-btn ui-corner-all" id="vahvistaPoisto" >Vahvista</a>
+				</div>
+			</div>
+		</div>
+		<div data-role="page" id="kantakartta">
+			<div role="main" class="ui-content ui-body-a" id="kantatiedot">
+				<div class="ui-grid-solo">
+					<div class="ui-block-a" style="width:100%">
+						<ul data-role="listview" data-inset="true">
+							<li data-role="fieldcontain"><span class='ui-btn-icon-left ui-icon-calendar'id="paiva"></span></li>	
+							<li data-role="fieldcontain"><span class='ui-btn-icon-left ui-icon-arrow-r'id="lahto"></span></li>
+							<li data-role="fieldcontain"><span class='ui-btn-icon-left ui-icon-arrow-l'id="paamaara"></span></li>
+							<li data-role="fieldcontain"><span class='ui-btn-icon-left ui-icon-clock'id="kesto"></span></li>
+							<li data-role="fieldcontain"><span class='ui-btn-icon-left ui-icon-gear'id="matka"></span></li>
+							<li data-role="fieldcontain"><span class='ui-btn-icon-left ui-icon-location'id="mittauksia"></span></li>
+						</ul>
+					</div>
+				</div>
+				<div class="ui-grid-a" >
+					<div class="ui-block-a" style="width:50%;" >
+						<ul data-role="listview" data-inset="true" >
+							<li data-role="fieldcontain" role="header"><h1 style="text-align:center;">Huippunopeus</h1></li>
+							<li data-role="fieldcontain" id="hnopeus"></li>
+						</ul>
+					</div>
+					<div class="ui-block-b" style="width:50%;">
+						<ul data-role="listview" data-inset="true">
+							<li data-role="fieldcontain"><h1>Keskinopeus</h1></li>
+							<li data-role="fieldcontain" id="knopeus"></li>
+						</ul>
+					</div>
+				</div>
+				<div style="text-align:center;">
+					<button class="ui-btn ui-icon-navigation ui-btn-icon-left ui-btn-inline ui-corner-all" id="karttanakyma">Näytä reitti</button>
+				</div>
+			</div>
+			<div role="main" class="ui-content ui-body-a" id="kantaKarttaNakyma" hidden>
+				<div id="mapKantaKartta" style="height:500px;"></div> 
+			</div>
+			<div data-role="footer" data-type="horizontal" style="text-align:center;">
+				<button class="ui-btn ui-icon-back ui-btn-icon-left ui-btn-inline ui-corner-all" id="paluu">Takaisin</button>
+			</div>
+		</div>
+
+	<script type="text/javascript" src="cordova.js"></script>
+	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDXWKzdFPRUvjNz5OHyWdGZ63hi9Bmzdws"></script>
+	<script>
+	var laiteKesken = $.Deferred(); //jarru_1=True
+	document.addEventListener("deviceReady", onDeviceReady, false);
+
+	function onDeviceReady() {			
+			laiteKesken.resolve();	//jarru_1=False	
+		}
+
+	//## muuttujia
+	var nollaa = false;		//varmistusnappeja
+	var varmistus = false;
+	var kantaReitti = [];
+	var kantaMerkit = [];
+	var onoff = false;
+	var laiteok = false;
+	$.when(laiteKesken).done(laiteok=true);
+	var palautus = '';	
+	var rPaalla = false;
+	var reitit = [];
+	var mSeconds = 0, seconds = 0, minutes = 0, hours = 0, t, aikaL, sekuntti = 0, laskurilkm = 0;
+	var alku,loppu;
+	var nykynopeus = 0, keskinopeus = 0, huippunopeus = 0, kuljettumatka = 0;
+	//##
+
+	//## sivuille siirtymisiä
+		$(document).one("pagebeforecreate", function () { //Aja kerran	
+			$("#popupMenu").enhanceWithin().popup();
+			});
+
+		$(document).on("pageshow","#kartta",function(){ //Aja Gmaps kun sivu aukeaa
+		if (reitit.length > 1){
+			luoKartta(reitit, 'mapKartta');	
+		};
+		});
+		
+		$(document).on("pageshow","#reitit",function(){ //Aja Gmaps kun sivu aukeaa
+			if (laiteok == true){
+				haeKannasta();
+			};
+		});
+	//##
+	
+	//## napit --etusivu--
+	$("#aloita").on("tap", function() {
+		if(laiteok == true) {
+			nollaa = false;
+			varmistus = false;
+			$("#nollaa").text("Nollaa");
+			$("#lopeta").prop("disabled", false);
+			$("#tiedot").prop("hidden", false);
+			$("#lopeta").text("Lopeta");	
+			if (onoff == false){
+				$("#aloita").text("Pause");
+				onoff = !onoff;
+				$("#nollaa").show();	
+				if (rPaalla == false){
+					haeSijainti(sekuntti, 1); // haetaan aloitussijainti
+					paivitaTiedot(0);
+					rPaalla = true;	
+				}
+				laskuri();
+			}
+			else {
+				$("#aloita").text("Jatka");
+				onoff = !onoff;
+				timer(1);
+			}
+		}
+		else {
+		window.alert("Laite ei ole vielä valmis!");
+		}
+	});
+	
+
+	$("#nollaa").on("tap", function() {
+		varmistus = false;
+		$("#lopeta").text("Lopeta");
+		if(nollaa == false){nollaa = true; $("#nollaa").text("Nollaa?"); return;}
+		nollaa = false;
+		nollaaTiedot();
+	});
+	
+		function nollaaTiedot(){
+		onoff = false;
+		varmistus = false;
+		rPaalla = false;
+		$("#talleta").hide();		
+		$("#nollaa").hide();
+		$("#lopeta").prop("disabled", true);
+		$("#lopeta").text("Lopeta")
+		$("#aloita").prop("disabled", false);
+		$("#aloita").text("Aloita");
+		$("#tiedot").prop("hidden", true);
+		$("#tiedotbody").hide();
+		$("#tiedotfooter").hide();
+		$("#perusbody").show();
+		$("#perusfooter").show();	
+		paivitaTiedot(1); // 1 = nollaa tiedot
+		timer(1); // 1 = lopeta laskuri
+		$("#kuvaus").val('');
+		mSeconds = 0; seconds = 0; minutes = 0; hours = 0, sekuntti = 0, laskurilkm = 0;
+		$(".aika > h1").text('');
+		reitit = []; alku = '', loppu = ''; //nollataan tiedot
+		nykynopeus = 0, keskinopeus = 0, huippunopeus = 0, kuljettumatka = 0;
+		}
+	
+	$("#lopeta").on("tap", function() {
+		$("#lopeta").text("Lopeta?");
+		nollaa = false;
+		$("#nollaa").text("Nollaa");
+			if (varmistus == true){
+				$("#talleta").show();
+				$("#lopeta").text("Lopeta")
+				onoff = false;
+				rPaalla = false;
+				$("#aloita").prop("disabled", true);
+				$("#lopeta").prop("disabled", true);
+				timer(1); // 1 = lopeta laskuri
+				haeSijainti(sekuntti,2); // haetaan lopetusijainti
+				console.log("lopetetaan");
+			}
+		if (varmistus == false){varmistus = true;}
+	});
+	
+	$("#talleta").on("tap", function() {
+		$("#perusbody").hide();
+		$("#perusfooter").hide();
+		$("#tiedotbody").show();
+		$("#tiedotfooter").show();
+		paivitaTiedot(2);
+		luoKartta(reitit, 'kartta2');
+	});
+		$("#peruuta").on("tap", function() {
+		$("#tiedotbody").hide();
+		$("#tiedotfooter").hide();
+		$("#perusbody").show();
+		$("#perusfooter").show();		
+		
+	});
+	
+	$("#vieKantaan").on("tap", function() {
+		var kuvaus =  $("#kuvaus").val();
+		vieKantaan(kuvaus);
+		setTimeout(function(){
+			console.log("kantaok =" +palautus);	
+		if (palautus != ''){
+			$.mobile.changePage($("#kantakartta"));
+			nollaaTiedot();
+			haeKannastaId(palautus);
+			setTimeout(luoTekstit, 2000);
+			palautus = '';
+		}
+		else{
+			window.alert("Tallennus epäonnistui");
+			palautus = '';
+		}
+		}, 3000);
+		
+	});
+	
+	//## --reitit-sivu--
+	//hae reitti kannasta id:n perusteella
+	$(document).on("tap", ".check", function(event) {
+	var temppi =$(this).context.id;
+	temppi = temppi.replace("check_", "");
+	$.mobile.changePage($("#kantakartta"));
+	haeKannastaId(temppi);
+	setTimeout(luoTekstit, 2000);
+	});
+	
+		var poistettava;
+	$(document).on("tap", ".delete", function(event) {
+		var temppi =$(this).context.id;
+		poistettava = temppi.replace("poistarivi_", "");
+		var poistotmp = "#poistoalku_" +poistettava;
+		console.log(poistotmp);
+		$("#poistoTxt").text("Olet poistamassa reittiä: " + $(poistotmp).text() + "-" + $("#poistoloppu_" +poistettava).text() + "\npäivämäärällä: " + $("#poistopvm_" +poistettava).text()+"?");
+		event.preventDefault(); 
+		$("#popup_vahvistus").popup("open");	
+	});
+	
+		$("#vahvistaPoisto").on("tap", function() {		
+			console.log("poista: " + poistettava);
+			poistaKannasta(poistettava);
+			setTimeout(function(){
+			haeKannasta();
+			$("#popup_vahvistus").popup("close")
+			}, 500);		
+		});
+	
+	$("#karttanakyma").on("tap", function(event) {
+		$("#kantatiedot").hide();
+		$("#kantaKarttaNakyma").show();
+		luoKartta(kantaMerkit,'mapKantaKartta');
+	});
+		$("#paluu").on("tap", function() {
+		if($("#kantaKarttaNakyma").is(":visible")){
+		$("#kantatiedot").show();
+		$("#kantaKarttaNakyma").hide();
+		return;
+		}
+		$("#paiva, #lahto, #paamaara, #kesto,#matka, #mittauksia, #hnopeus,#knopeus").text("");
+		$.mobile.changePage($("#reitit"));
+	});
+	
+	//##
+	
+	
+	//## Kanta funktiot
+	function poistaKannasta(deleteid){
+					$.ajax({
+					type: 'POST',
+					url: 'http://proto387.haaga-helia.fi/~a1402763/backend/DeleteReittiId.php',
+					data: {id: deleteid},
+					timeout:1000
+					});			
+		}
+	
+	function vieKantaan(kuvaus){
+	var kantaaika = (hours ? (hours > 9 ? hours : "0" + hours) : "00") + ":" + (minutes ? (minutes > 9 ? minutes : "0" + minutes) : "00") + ":" + (seconds > 9 ? seconds : "0" + seconds);
+
+					$.ajax({
+					type: 'POST',
+					url: 'http://proto387.haaga-helia.fi/~a1402763/backend/InsertReitti.php',
+					data: {alku:alku, loppu:loppu, kuvaus: kuvaus, huippu: huippunopeus, keski: keskinopeus, kokmatka: kuljettumatka, kokaika: kantaaika},
+					
+					success: function(data){
+							var tmplon, tmplat;
+							console.log("data: " + data);
+							var tmpid = data;
+							console.log(tmpid);
+						for(var i = 0; i < reitit.length; i++){
+							tmplon = reitit[i].lon;
+							tmplat = reitit[i].lat;
+							$.ajax({
+								type: 'POST',
+								url: 'http://proto387.haaga-helia.fi/~a1402763/backend/InsertLonlat.php',
+								data: {lon: tmplon, lat: tmplat, idR: tmpid},
+								});
+						}
+					console.log("onnistui: " + data);
+					palautus = data;
+					},
+					error: function(data){						
+						$.ajax({
+						type: 'POST',
+						url: 'http://proto387.haaga-helia.fi/~a1402763/backend/DeleteReittiId.php',
+						data: {id: data}
+						});
+						console.log("tallennus epäonnistui");
+						
+						},
+					timeout:2000
+				});	
+	}
+	
+	function luoTekstit(){
+		$("#paiva").text(kantaReitti[0].pvm);
+		$("#lahto").text(kantaReitti[0].alku);
+		$("#paamaara").text(kantaReitti[0].loppu);
+		$("#kesto").text(kantaReitti[0].kokaika);
+		$("#matka").text(kantaReitti[0].kokmatka + " km");
+		$("#mittauksia").text(kantaMerkit.length+ " mittausta");
+		$("#hnopeus").text(kantaReitti[0].huippu +" kmh");
+		$("#knopeus").text(kantaReitti[0].keski +" km/h");		
+	}
+	
+	function haeKannastaId(reittiID){
+	kantaReitti = [];
+	kantaMerkit = [];
+		$.getJSON("http://proto387.haaga-helia.fi/~a1402763/backend/HaeReittiId.php", {
+			id: reittiID
+			}, function(result){
+				$.each(result, function(i, field) {
+				kantaReitti.push(new matka(field.idR, field.pvm, field.alku, field.loppu, field.huippu, field.keski, field.kokmatka, field.kokaika));
+				});	
+			});
+		setTimeout(haeMerkit(reittiID),200);
+	}
+	
+	function haeMerkit(id){
+			$.getJSON("http://proto387.haaga-helia.fi/~a1402763/backend/HaeMerkit.php", {
+			id: id
+			}, function(result){
+					$.each(result, function(i, field) {
+					kantaMerkit.push(new reitti(parseFloat(field.lon), parseFloat(field.lat),0,0,0,0));
+					});
+				});
+	}
+	
+	function haeKannasta(){
+			$("#reitteja").html("");
+			$.getJSON("http://proto387.haaga-helia.fi/~a1402763/backend/HaeReitit.php", function(result){
+				$("#reittiListaAlku li.datarivi, #reittiListaLoppu li.datarivi, #reittiListaLoppu li.datarivi, #reittiListaPvm li.datarivi, #reittiListaValitse li.datarivi, #reittiListaPoista li.datarivi").remove();				
+				$.each(result, function(i, field) {
+					$("#reittiListaValitse").append("<li data-role='fieldcontain' class='datarivi'><span class='check ui-btn-icon-notext ui-icon-check ui-icon-notext' id='check_"+field.idR + "'>&nbsp;</span></li>");
+					$("#reittiListaAlku").append("<li data-role='fieldcontain' class='datarivi' id='poistoalku_" + field.idR +"'>"+field.alku +"</li>");
+					$("#reittiListaLoppu").append("<li data-role='fieldcontain' class='datarivi' id='poistoloppu_" + field.idR + "'>"+ field.loppu+"</li>");
+					$("#reittiListaPvm").append("<li data-role='fieldcontain' class='datarivi' id='poistopvm_" + field.idR + "'>"+ field.pvm+"</li>");
+					$("#reittiListaPoista").append("<li data-role='fieldcontain' class='datarivi'><span class='delete ui-btn-icon-notext ui-icon-delete ui-icon-notext' id='poistarivi_"+field.idR + "'>&nbsp;</span></li>");
+					$("#reittiListaAlku").listview("refresh");
+					$("#reittiListaLoppu").listview("refresh");					
+					$("#reittiListaPvm").listview("refresh");
+					$("#reittiListaValitse").listview("refresh");
+					$("#reittiListaPoista").listview("refresh");	
+					});
+			});
+	}
+	//##
+	
+	//## Kello
+	function laskuri(){
+		    mSeconds++;
+	if (mSeconds >= 10) {
+		mSeconds = 0;
+		laskurilkm++;
+		if (laskurilkm == 5) {
+			haeSijainti(sekuntti, 0);
+			paivitaTiedot(0);
+			laskurilkm = 0;	
+		}
+		seconds++;
+		sekuntti++;
+
+		if (seconds >= 60) {
+			seconds = 0;
+			minutes++;
+			if (minutes >= 60) {
+				minutes = 0;
+				hours++;
+			}
+		}
+    }
+	aikaL = (hours ? (hours > 9 ? hours : "0" + hours) : "00") + ":" + (minutes ? (minutes > 9 ? minutes : "0" + minutes) : "00") + ":" + (seconds > 9 ? seconds : "0" + seconds) + ":" +(mSeconds > 9 ? mSeconds : "" + mSeconds);
+
+	$(".aika > h1").text(aikaL);
+    timer(0);
+	}
+	
+	function timer(stop) {
+		if (stop == 0){
+		t = setTimeout(laskuri, 100);
+		}
+		else {
+		clearTimeout(t);
+		}
+	}
+	//##
+	
+	//## Konstruktorit
+	function reitti(lon, lat, aika, nopeus, matka, sijainti){
+		this.lon = lon
+		this.lat = lat
+		this.aika = aika
+		this.nopeus = nopeus
+		this.sijainti = sijainti
+		this.matka = matka
+	}
+	
+	function matka(idR, pvm, alku, loppu, huippu, keski, kokmatka, kokaika) {
+			this.idR = idR
+			this.pvm = pvm
+			this.alku = alku
+			this.loppu = loppu
+			this.huippu = huippu
+			this.keski = keski
+			this.kokmatka = kokmatka
+			this.kokaika = kokaika
+	}
+	//##
+	
+	// Päivittää lukemat näytölle
+	function paivitaTiedot(rst) {
+		if (rst == 0) { // päänäkymä
+			$("#nykynopeus").text(nykynopeus + " km/h");
+			$("#huippunopeus").text(huippunopeus + " km/h");
+			$("#keskinopeus").text(keskinopeus.toFixed(2) + " km/h");
+			$("#kuljettumatka").text((kuljettumatka*1000).toFixed(2) + " metriä"); //metreiksi	
+
+		}		
+		
+		else if (rst ==1){ //nollaus
+			$("#nykynopeus").text('');
+			$("#huippunopeus").text('');
+			$("#keskinopeus").text('');
+			$("#kuljettumatka").text('');	
+			$("#huippu").text('');
+			$("#keski").text('');
+			$("#kokMatka").text('');
+			$("#kulutettuaika").text('');
+			$("#alkupiste").text('');
+			$("#loppupiste").text('');
+			$("#mittaukset").text('');			
+		}
+		else if (rst == 2){ //tallennusnäkymä
+			$("#huippu").text(huippunopeus+ " km/h");
+			$("#keski").text(keskinopeus.toFixed(2) + " km/h");
+			$("#kokMatka").text((kuljettumatka).toFixed(2) + " km");
+			$("#kulutettuaika").text((hours ? (hours > 9 ? hours : "0" + hours) : "00") + ":" + (minutes ? (minutes > 9 ? minutes : "0" + minutes) : "00") + ":" + (seconds > 9 ? seconds : "0" + seconds) + ":" +(mSeconds > 9 ? mSeconds : "" + mSeconds));
+			$("#alkupiste").text(alku);
+			$("#loppupiste").text(alku);
+			$("#mittaukset").text(reitit.length + " mittausta");
+		}
+
+	}
+	
+
+		// Hae GPS ja laske edelliseen mittaukseen nähden nopeus ja matka
+	function haeSijainti(sekuntti, sijaintihaku){
+			navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError, { timeout: 20000 });
+			 	var geocoder = new google.maps.Geocoder;
+			function onLocationSuccess(position) {
+				var paikka;
+					lat = position.coords.latitude;
+					lon = position.coords.longitude;
+					var tmpmatka;
+					if (sekuntti == 0){tempmatka = 0;}
+					if (sijaintihaku != 0) {
+							var latlng = new google.maps.LatLng(lat, lon);
+							geocoder.geocode({'location': latlng}, function(results, status) {
+								if (status === 'OK') {
+									if (results[1]) {
+									paikka = results[1].formatted_address;
+									console.log(paikka);
+									if (sijaintihaku == 1){alku = paikka;}
+									if (sijaintihaku == 2){loppu = paikka;}
+									}
+								}
+								else {
+								console.log("ei loytynyt sijaintia");
+								paikka = '';
+								}
+							});
+					}
+			reitit.push({lon: lon, lat: lat, aika: sekuntti, matka: 0, nopeus: 0});
+			if (reitit.length != 1){ // Ei mittaa aloituslukemaa
+			console.log("koko: " + reitit.length);
+			var tmpnopeus, k=reitit.length-1, tmpkeskinopeus = 0;
+			tmpmatka = laskeMatka(reitit[k-1].lat, reitit[k-1].lon, reitit[k].lat, reitit[k].lon);
+			tmpnopeus = laskeNopeus(sekuntti, tmpmatka);
+			if (tmpnopeus < 1){tmpnopeus = 0;}
+			reitit[k].matka = tmpmatka;
+			reitit[k].nopeus = tmpnopeus;
+			kuljettumatka += tmpmatka;
+			nykynopeus = tmpnopeus;
+			console.log("nopeus: " + nykynopeus + " matka: " + kuljettumatka);
+			if (huippunopeus < nykynopeus){huippunopeus=nykynopeus;}
+			for(var i = 1; i < reitit.length;i++){
+				tmpkeskinopeus += reitit[i].nopeus;
+				}
+			keskinopeus = tmpkeskinopeus/reitit.length;
+			}
+			console.table(reitit);
+			
+			}
+			function onLocationError() {				
+				console.log("Paikannus ei onnistu");
+			}
+			
+	}
+			// Luo kartta haluttuun html id:seen
+	      function luoKartta(array, map) {
+        var kartta = new google.maps.Map(document.getElementById(map), {
+          zoom: 16,
+          center: new google.maps.LatLng(array[0].lat, array[0].lon),
+          mapTypeId: 'terrain'
+        });
+
+        var reittilista = [];
+			for (var i = 0; i < array.length;i++){
+			reittilista.push({lat: array[i].lat, lng: array[i].lon});
+			}
+			console.log("luokartta:")
+			console.table(reittilista);
+        var matka = new google.maps.Polyline({
+          path: reittilista,
+          geodesic: true,
+          strokeColor: '#FF0000',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+
+        matka.setMap(kartta);
+      }
+
+	
+	//**kopioitu koodi Stackoverflowsta. Laskee etäisyyden 2:n lon lat lukeman välillä
+	function laskeMatka(lat1, lon1, lat2, lon2){
+		var R = 6371; // Radius of the earth in km
+		var dLat = deg2rad(lat2-lat1);  // deg2rad below
+		var dLon = deg2rad(lon2-lon1); 
+		var a = 
+			Math.sin(dLat/2) * Math.sin(dLat/2) +
+			Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+			Math.sin(dLon/2) * Math.sin(dLon/2)
+		; 
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+		var d = R * c; // Distance in km
+		return d;
+	}
+	//**
+	
+	function deg2rad(deg) {
+	  return deg * (Math.PI/180)
+
+	}
+	
+	//Laskee nopeuden (km/h) sekunttien perusteella
+	function laskeNopeus(aika, matka){
+		var n;
+		var kerroin = 1000 / 3600; //kerroin km/h -> m/s
+		n = parseInt(matka * 1000 / kerroin / aika); // matka(km) * 1000 (metreiksi) / kerroin / aika(sekunttia)
+		return n;
+	}
+	
+	</script>
+    </body>
+</html>
