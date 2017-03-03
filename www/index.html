@@ -443,7 +443,7 @@ reitit.push(new reitti(24.938379, 60.169456, 1800, 0, "Helsinki2"));
 	function poistaKannasta(deleteid){
 					$.ajax({
 					type: 'POST',
-					url: 'http://proto387.haaga-helia.fi/~a1402763/backend/DeleteReittiId.php',
+					url: 'DeleteReittiId.php',
 					data: {id: deleteid},
 					timeout:1000
 					});			
@@ -454,7 +454,7 @@ reitit.push(new reitti(24.938379, 60.169456, 1800, 0, "Helsinki2"));
 
 					$.ajax({
 					type: 'POST',
-					url: 'http://proto387.haaga-helia.fi/~a1402763/backend/InsertReitti.php',
+					url: 'InsertReitti.php',
 					data: {alku:alku, loppu:loppu, kuvaus: kuvaus, huippu: huippunopeus, keski: keskinopeus, kokmatka: kuljettumatka, kokaika: kantaaika},
 					
 					success: function(data){
@@ -465,7 +465,7 @@ reitit.push(new reitti(24.938379, 60.169456, 1800, 0, "Helsinki2"));
 							tmplat = reitit[i].lat;
 							$.ajax({
 								type: 'POST',
-								url: 'http://proto387.haaga-helia.fi/~a1402763/backend/InsertLonlat.php',
+								url: 'InsertLonlat.php',
 								data: {lon: tmplon, lat: tmplat, idR: tmpid},
 								});
 						}
@@ -474,7 +474,7 @@ reitit.push(new reitti(24.938379, 60.169456, 1800, 0, "Helsinki2"));
 					error: function(data){						
 						$.ajax({
 						type: 'POST',
-						url: 'http://proto387.haaga-helia.fi/~a1402763/backend/DeleteReittiId.php',
+						url: 'DeleteReittiId.php',
 						data: {id: data}
 						});
 						console.log("tallennus epäonnistui");
@@ -498,7 +498,7 @@ reitit.push(new reitti(24.938379, 60.169456, 1800, 0, "Helsinki2"));
 	function haeKannastaId(reittiID){
 	kantaReitti = [];
 	kantaMerkit = [];
-		$.getJSON("http://proto387.haaga-helia.fi/~a1402763/backend/HaeReittiId.php", {
+		$.getJSON("HaeReittiId.php", {
 			id: reittiID
 			}, function(result){
 				$.each(result, function(i, field) {
@@ -509,7 +509,7 @@ reitit.push(new reitti(24.938379, 60.169456, 1800, 0, "Helsinki2"));
 	}
 	
 	function haeMerkit(id){
-			$.getJSON("http://proto387.haaga-helia.fi/~a1402763/backend/HaeMerkit.php", {
+			$.getJSON("HaeMerkit.php", {
 			id: id
 			}, function(result){
 					$.each(result, function(i, field) {
@@ -520,7 +520,7 @@ reitit.push(new reitti(24.938379, 60.169456, 1800, 0, "Helsinki2"));
 	
 	function haeKannasta(){
 			$("#reitteja").html("");
-			$.getJSON("http://proto387.haaga-helia.fi/~a1402763/backend/HaeReitit.php", function(result){
+			$.getJSON("HaeReitit.php", function(result){
 				$("#reittiListaAlku li.datarivi, #reittiListaLoppu li.datarivi, #reittiListaLoppu li.datarivi, #reittiListaPvm li.datarivi, #reittiListaValitse li.datarivi, #reittiListaPoista li.datarivi").remove();				
 				$.each(result, function(i, field) {
 					$("#reittiListaValitse").append("<li data-role='fieldcontain' class='datarivi'><span class='check ui-btn-icon-notext ui-icon-check ui-icon-notext' id='check_"+field.idR + "'>&nbsp;</span></li>");
